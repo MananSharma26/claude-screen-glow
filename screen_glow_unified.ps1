@@ -5,10 +5,24 @@ param(
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+Add-Type -TypeDefinition @"
+using System.Windows.Forms;
+public class NoActivateForm : Form {
+    protected override bool ShowWithoutActivation { get { return true; } }
+    protected override System.Windows.Forms.CreateParams CreateParams {
+        get {
+            System.Windows.Forms.CreateParams cp = base.CreateParams;
+            cp.ExStyle |= 0x08000000; // WS_EX_NOACTIVATE
+            return cp;
+        }
+    }
+}
+"@ -ReferencedAssemblies System.Windows.Forms
+
 $screen = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
 $barWidth = 100
 
-$form = New-Object System.Windows.Forms.Form
+$form = New-Object NoActivateForm
 $form.FormBorderStyle = 'None'
 $form.TopMost = $true
 $form.ShowInTaskbar = $false
